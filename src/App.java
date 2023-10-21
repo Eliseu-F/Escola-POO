@@ -1,36 +1,49 @@
 import model.Aluno;
+import model.Aluno.AlunoBuilder;
 import service.SituacaoService;
+import service.Validacao.FrequenciaValidador;
+import service.Validacao.NotaValidador;
+import service.Validacao.Validador;
 
 public class App {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         runTest();
     }
 
     private static void runTest() {
-        var aluno = new Aluno(1, "João", "A", 0, 0);
-        var service = new SituacaoService();
-        test(service, aluno, 0, 74, "Reprovado por falta");
-        test(service, aluno, 0, 75, "Reprovado por nota");
-        test(service, aluno, 3.9, 75, "Reprovado por nota");
-        test(service, aluno, 4, 75, "Exame");
-        test(service, aluno, 6.9, 75, "Exame");
-        test(service, aluno, 7, 75, "Aprovado");
-        test(service, aluno, 10, 75, "Aprovado");
+        Validador frequenciaValidador = new FrequenciaValidador();
+        Validador notaValidador = new NotaValidador();
+        
+        SituacaoService service = new SituacaoService(frequenciaValidador);
+
+        Aluno aluno1 = new AlunoBuilder()
+            .setId(1)
+            .setNome("João")
+            .setTurma("A")
+            .setNota(8.5)
+            .setFrequencia(90)
+            .build();
+
+        test(service, aluno1, "Aprovado");
+
+        service = new SituacaoService(notaValidador);
+        Aluno aluno2 = new AlunoBuilder()
+            .setId(2)
+            .setNome("Maria")
+            .setTurma("B")
+            .setNota(3.5)
+            .setFrequencia(85)
+            .build();
+
+        test(service, aluno2, "Reprovado por nota");
     }
 
-    private static void test(SituacaoService service, Aluno aluno, double nota, int frequencia, String situacaoEsperada) {
-        aluno.setNota(nota);
-        aluno.setFrequencia(frequencia);
+    private static void test(SituacaoService service, Aluno aluno, String situacaoEsperada) {
         var situacao = service.processarSituacao(aluno);
         if (situacao.equals(situacaoEsperada)) {
-            System.out.println(String.format("V nota=%.2f, freq=%d, sit=%s", nota, frequencia, situacao));
-            return;
+            System.out.println(String.format("V - Aluno: %s, Situação: %s", aluno.getNome(), situacao));
+        } else {
+            System.out.println(String.format("X - Aluno: %s, Situação: %s", aluno.getNome(), situacao));
         }
-        System.err.println(String.format("X nota=%.2f, freq=%d, sit=%s", nota, frequencia, situacao));
-
     }
-
-
-
-
 }

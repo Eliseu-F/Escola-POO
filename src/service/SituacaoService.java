@@ -1,32 +1,28 @@
 package service;
 
 import model.Aluno;
-import model.AlunosPattern;
 
-public abstract class SituacaoService {
-    public String processarSituacao(Aluno aluno){
+import service.Validacao.Validador;
 
+public class SituacaoService {
+    private Validador validador;
 
-
-        var frequencia = aluno.getFrequencia();
-
-        var nota = new AlunosPattern() 
-            
-        };
-
-        if (frequencia < 75) {
-            return "Reprovado por falta";
-        }
-        if (nota < 4) {
-            return "Reprovado por nota";
-        }
-        if (nota < 7) {
-            return "Exame";
-        }
-        return "Aprovado";
+    public SituacaoService(Validador validador) {
+        this.validador = validador;
     }
 
-   
-
-    
+    public String processarSituacao(Aluno aluno) {
+        if (validador.validar(aluno)) {
+            var nota = aluno.getNota();
+            if (nota < 4) {
+                return "Reprovado por nota";
+            }
+            if (nota < 7) {
+                return "Exame";
+            }
+            return "Aprovado";
+        } else {
+            return "Reprovado por falta";
+        }
+    }
 }
